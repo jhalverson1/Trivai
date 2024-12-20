@@ -3,13 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 from question_generator import QuestionGenerator
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Your React frontend URL
+    allow_origins=[
+        "http://localhost:3000",  # Local development
+        "https://*.railway.app",  # Railway domains
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,3 +58,6 @@ async def check_answer(answer_request: AnswerRequest) -> dict:
         "correct": is_correct,
         "correct_answer": answer_request.correct_answer
     } 
+
+# Add after your existing FastAPI setup
+app.mount("/", StaticFiles(directory="static", html=True))
