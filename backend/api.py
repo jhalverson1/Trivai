@@ -11,8 +11,12 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",  # Local development
-        "https://*.railway.app",  # Railway domains
+        "http://localhost:3000",    # Local development
+        "http://127.0.0.1:3000",    # Alternative local development
+        "https://*.railway.app",    # Railway domains
+        "http://backend:8000",      # Docker internal
+        "http://frontend:3000",     # Docker internal
+        "*"                         # Allow all origins for testing (remove in production)
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -33,11 +37,14 @@ class AnswerRequest(BaseModel):
 
 @app.get("/api/question")
 async def get_question(category: Optional[str] = None) -> QuestionResponse:
+    print("Received question request")
     question_data = question_generator.generate_question(category)
     
     if not question_data:
+        print("Failed to generate question")
         raise HTTPException(status_code=500, detail="Failed to generate question")
     
+    print("Returning question:", question_data)
     return QuestionResponse(
         question=question_data['question'],
         options=question_data['options'],
