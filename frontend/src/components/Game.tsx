@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Question, AnswerResponse } from '../types';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 const Game = () => {
   const [question, setQuestion] = useState<Question | null>(null);
   const [score, setScore] = useState(0);
@@ -10,7 +12,7 @@ const Game = () => {
 
   const fetchQuestion = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/question', {
+      const response = await axios.get(`${API_URL}/api/question`, {
         params: {
           category: category || undefined
         }
@@ -25,7 +27,7 @@ const Game = () => {
     if (!question) return;
 
     try {
-      const response = await axios.post<AnswerResponse>('http://localhost:8000/api/check-answer', {
+      const response = await axios.post<AnswerResponse>(`${API_URL}/api/check-answer`, {
         answer,
         correct_answer: question.correct_answer
       });
