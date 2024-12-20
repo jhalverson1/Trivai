@@ -17,4 +17,45 @@ services:
       - ./backend:/app
       - /app/static
     env_file:
-      - ./backend/.env 
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/trivai
+    depends_on:
+      db:
+        condition: service_healthy
+    command: |
+      sh -c '
+        echo "Starting Alembic migrations..." &&
+        cd /app &&
+        echo "Current directory: $(pwd)" &&
+        echo "Database URL: $DATABASE_URL" &&
+        echo "Listing migrations:" &&
+        ls -la alembic/versions/ &&
+        echo "Running alembic current..." &&
+        PYTHONPATH=/app DATABASE_URL=postgresql://postgres:postgres@db:5432/trivai alembic current &&
+        echo "Running alembic upgrade..." &&
+        PYTHONPATH=/app DATABASE_URL=postgresql://postgres:postgres@db:5432/trivai alembic upgrade head &&
+        echo "Verifying database..." &&
+        python verify_db.py &&
+        echo "Migrations complete" &&
+        python server.py
+      '
+
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=trivai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

@@ -1,9 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 from question_generator import QuestionGenerator
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
+from database import get_db
+import models
+import json
 
 app = FastAPI()
 
@@ -36,7 +40,7 @@ class AnswerRequest(BaseModel):
     correct_answer: str
 
 @app.get("/api/question")
-async def get_question(category: Optional[str] = None) -> QuestionResponse:
+async def get_question(category: Optional[str] = None, db: Session = Depends(get_db)) -> QuestionResponse:
     print("Received question request")
     question_data = question_generator.generate_question(category)
     
@@ -45,6 +49,16 @@ async def get_question(category: Optional[str] = None) -> QuestionResponse:
         raise HTTPException(status_code=500, detail="Failed to generate question")
     
     print("Returning question:", question_data)
+    
+    # Save question to database
+    db_question = models.Question(
+        question_text=question_data['question'],
+        correct_answer=question_data['correct_answer'],
+        options=json.dumps(question_data['options'])
+    )
+    db.add(db_question)
+    db.commit()
+    
     return QuestionResponse(
         question=question_data['question'],
         options=question_data['options'],
