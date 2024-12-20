@@ -41,29 +41,33 @@ class AnswerRequest(BaseModel):
 
 @app.get("/api/question")
 async def get_question(category: Optional[str] = None, db: Session = Depends(get_db)) -> QuestionResponse:
-    print("Received question request")
-    question_data = question_generator.generate_question(category)
-    
-    if not question_data:
-        print("Failed to generate question")
-        raise HTTPException(status_code=500, detail="Failed to generate question")
-    
-    print("Returning question:", question_data)
-    
-    # Save question to database
-    db_question = models.Question(
-        question_text=question_data['question'],
-        correct_answer=question_data['correct_answer'],
-        options=json.dumps(question_data['options'])
-    )
-    db.add(db_question)
-    db.commit()
-    
-    return QuestionResponse(
-        question=question_data['question'],
-        options=question_data['options'],
-        correct_answer=question_data['correct_answer']
-    )
+    try:
+        print("Received question request")
+        question_data = question_generator.generate_question(category)
+        
+        if not question_data:
+            print("Failed to generate question")
+            raise HTTPException(status_code=500, detail="Failed to generate question")
+        
+        print("Returning question:", question_data)
+        
+        # Save question to database
+        db_question = models.Question(
+            question_text=question_data['question'],
+            correct_answer=question_data['correct_answer'],
+            options=json.dumps(question_data['options'])
+        )
+        db.add(db_question)
+        db.commit()
+        
+        return QuestionResponse(
+            question=question_data['question'],
+            options=question_data['options'],
+            correct_answer=question_data['correct_answer']
+        )
+    except Exception as e:
+        print(f"Error in get_question: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/check-answer")
 async def check_answer(answer_request: AnswerRequest) -> dict:

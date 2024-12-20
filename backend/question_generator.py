@@ -6,6 +6,10 @@ class QuestionGenerator:
         self.client = OpenAI(api_key=OPENAI_API_KEY)
 
     def generate_question(self, category=None):
+        if not OPENAI_API_KEY:
+            print("OpenAI API key is not set")
+            raise Exception("OpenAI API key is not configured")
+
         prompt = "Generate a trivia question with 4 multiple choice options and indicate the correct answer. "
         if category:
             prompt += f"The category should be {category}. "
@@ -21,8 +25,8 @@ class QuestionGenerator:
                 return self.generate_question(category)  # Try again if parsing failed
             return parsed
         except Exception as e:
-            print(f"Error generating question: {e}")
-            return None
+            print(f"Error generating question: {str(e)}")
+            raise Exception(f"Failed to generate question: {str(e)}")
 
     def _parse_question(self, response):
         try:
