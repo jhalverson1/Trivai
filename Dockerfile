@@ -22,7 +22,9 @@ COPY --from=frontend-builder /frontend/build /app/static
 # Update CORS settings for Railway domain
 ENV CORS_ORIGIN="https://*.railway.app"
 
-# Use Railway's PORT or default to 8080
+# Remove default DATABASE_URL to ensure Railway's is used
 ENV PORT=8080
 EXPOSE $PORT
-CMD ["python", "server.py"] 
+
+# Run migrations and start server
+CMD alembic upgrade head && python server.py 
