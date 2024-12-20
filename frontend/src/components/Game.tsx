@@ -12,6 +12,7 @@ const Game = () => {
 
   const fetchQuestion = async () => {
     try {
+      console.log('Fetching from:', `${API_URL}/api/question`);
       const response = await axios.get(`${API_URL}/api/question`, {
         params: {
           category: category || undefined
