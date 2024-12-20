@@ -3,6 +3,10 @@ import axios from 'axios';
 import { Question, AnswerResponse } from '../types';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+console.log('Environment variables:', {
+  REACT_APP_API_URL: process.env.REACT_APP_API_URL,
+  API_URL: API_URL
+});
 
 const Game = () => {
   const [question, setQuestion] = useState<Question | null>(null);
