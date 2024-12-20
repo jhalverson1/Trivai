@@ -1,30 +1,25 @@
 import React from 'react';
-import { QuestionData } from '../types';
+import { Question } from '../types';
 
 interface QuestionProps {
-  question: QuestionData;
+  question: Question;
   onAnswer: (answer: string) => void;
-  onQuit: () => void;
 }
 
-const Question: React.FC<QuestionProps> = ({ question, onAnswer, onQuit }) => {
+const Question: React.FC<QuestionProps> = ({ question, onAnswer }) => {
   return (
-    <div className="question-container">
+    <div>
       <h3>{question.question}</h3>
       <div className="options">
-        {question.options.map((option, index) => (
+        {question.options.map((option: string, index: number) => (
           <button
             key={index}
             onClick={() => onAnswer(option.split(')')[0].trim())}
-            className="option-button"
           >
             {option}
           </button>
         ))}
       </div>
-      <button onClick={onQuit} className="quit-button">
-        Quit Game
-      </button>
     </div>
   );
 };
