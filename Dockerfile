@@ -22,6 +22,7 @@ COPY --from=frontend-builder /frontend/build /app/static
 # Update CORS settings for Railway domain
 ENV CORS_ORIGIN="https://*.railway.app"
 
-ENV PORT=8000
+# Use Railway's PORT or default to 8080
+ENV PORT=8080
 EXPOSE $PORT
 CMD ["python", "server.py"] 
