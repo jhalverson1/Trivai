@@ -27,9 +27,8 @@ class AnswerRequest(BaseModel):
     answer: str
     correct_answer: str
 
-@app.post("/api/question")
+@app.get("/api/question")
 async def get_question(category: Optional[str] = None) -> QuestionResponse:
-    # Reference to question_generator.py lines 8-22
     question_data = question_generator.generate_question(category)
     
     if not question_data:

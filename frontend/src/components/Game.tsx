@@ -10,8 +10,10 @@ const Game = () => {
 
   const fetchQuestion = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/api/question', {
-        category: category || undefined
+      const response = await axios.get('http://localhost:8000/api/question', {
+        params: {
+          category: category || undefined
+        }
       });
       setQuestion(response.data);
     } catch (error) {

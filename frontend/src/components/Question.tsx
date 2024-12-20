@@ -1,8 +1,8 @@
 import React from 'react';
-import { Question } from '../types';
+import type { Question as QuestionType } from '../types';
 
 interface QuestionProps {
-  question: Question;
+  question: QuestionType;
   onAnswer: (answer: string) => void;
 }
 
