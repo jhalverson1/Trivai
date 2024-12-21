@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from routes.game import router as game_router
 import json
 import os
@@ -11,6 +12,7 @@ origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://frontend:3000",
+    "https://*.railway.app",
     "*",  # Remove in production
 ]
 
@@ -25,10 +27,33 @@ app.add_middleware(
 # Mount the game routes
 app.include_router(game_router, prefix="/api")
 
-# Optional: Add a health check endpoint
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+# Root route handler
+@app.get("/")
+async def root():
+    return JSONResponse(content={"status": "ok", "message": "API is running"})
+
+# Check answer endpoint
+@app.post("/api/check-answer")
+async def check_answer(answer_data: dict):
+    user_answer = answer_data.get('answer', '').upper()
+    correct_answer = answer_data.get('correct_answer', '')
+    
+    if ')' in correct_answer:
+        correct_answer = correct_answer.split(')')[0].strip()
+    
+    is_correct = user_answer == correct_answer.upper()
+    return {
+        "correct": is_correct,
+        "correct_answer": correct_answer
+    }
+
+# Handle 404 errors
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": f"Route {request.url.path} not found"}
+    )
 
 if __name__ == "__main__":
     import uvicorn
