@@ -42,7 +42,7 @@ class AnswerRequest(BaseModel):
 @app.get("/api/question")
 async def get_question(category: Optional[str] = None, db: Session = Depends(get_db)) -> QuestionResponse:
     try:
-        print("Received question request")
+        print(f"Received question request with category: {category}")
         question_data = question_generator.generate_question(category)
         
         if not question_data:

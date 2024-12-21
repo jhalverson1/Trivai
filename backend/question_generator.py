@@ -10,21 +10,24 @@ class QuestionGenerator:
             print("OpenAI API key is not set")
             raise Exception("OpenAI API key is not configured")
 
-        prompt = """Generate a trivia question that is:
+        base_prompt = """Generate a trivia question that is:
 1. Focused on well-established historical facts, scientific concepts, or cultural knowledge
 2. Clear and unambiguous
 3. Have 4 distinct multiple choice options
-4. Include one clearly correct answer
+4. Include one clearly correct answer"""
 
-Note: Avoid current events or time-sensitive information.
-If a category is provided, ensure the question fits that category.
-
-Format: Question|A) Option1|B) Option2|C) Option3|D) Option4|Correct:Letter"""
+        if category:
+            base_prompt += f"\n\nThe question MUST be about {category}."
+        
+        base_prompt += "\n\nFormat: Question|A) Option1|B) Option2|C) Option3|D) Option4|Correct:Letter"
 
         try:
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": prompt}]
+                messages=[
+                    {"role": "system", "content": "You are a trivia question generator."},
+                    {"role": "user", "content": base_prompt}
+                ]
             )
             parsed = self._parse_question(response.choices[0].message.content)
             if parsed is None:
