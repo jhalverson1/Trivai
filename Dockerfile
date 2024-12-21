@@ -26,5 +26,14 @@ ENV CORS_ORIGIN="https://*.railway.app"
 ENV PORT=8080
 EXPOSE $PORT
 
-# Run migrations and start server
-CMD alembic upgrade head && python server.py 
+# Create required directories
+RUN mkdir -p alembic/versions
+
+# Run migrations and start server with proper error handling
+CMD bash -c '\
+    echo "Waiting for database..." && \
+    sleep 5 && \
+    echo "Running migrations..." && \
+    alembic upgrade head && \
+    echo "Starting server..." && \
+    python server.py'
