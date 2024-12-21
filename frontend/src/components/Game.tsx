@@ -12,6 +12,8 @@ const Game = () => {
   const [category, setCategory] = useState('');
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [answered, setAnswered] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
   const fetchQuestion = async () => {
     setIsLoading(true);
@@ -29,8 +31,9 @@ const Game = () => {
 
   const handleAnswer = async (answer: string) => {
     if (!question || isLoading) return;
-    setIsLoading(true);
-
+    setSelectedAnswer(answer);
+    setAnswered(true);
+    
     try {
       const response = await axios.post<AnswerResponse>(`${API_URL}/api/check-answer`, {
         answer,
@@ -41,10 +44,15 @@ const Game = () => {
         setScore(prev => prev + 1);
       }
       
-      await fetchQuestion();
+      setTimeout(async () => {
+        setAnswered(false);
+        setSelectedAnswer(null);
+        await fetchQuestion();
+      }, 1500);
     } catch (error) {
       console.error('Error checking answer:', error);
-      setIsLoading(false);
+      setAnswered(false);
+      setSelectedAnswer(null);
     }
   };
 
@@ -79,10 +87,18 @@ const Game = () => {
               <div className="options">
                 {question.options.map((option, index) => (
                   <button
-                    className="option-button"
+                    className={`option-button ${
+                      answered
+                        ? option.startsWith(question.correct_answer)
+                          ? 'correct'
+                          : selectedAnswer === option.split(')')[0].trim()
+                          ? 'wrong'
+                          : ''
+                        : ''
+                    }`}
                     key={index}
                     onClick={() => handleAnswer(option.split(')')[0].trim())}
-                    disabled={isLoading}
+                    disabled={answered}
                   >
                     {option}
                   </button>

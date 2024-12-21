@@ -7,38 +7,53 @@
 .category-input {
   width: 100%;
   max-width: 300px;
-  padding: 10px;
+  padding: 12px;
   margin: 20px 0;
-  border: 2px solid #61dafb;
-  border-radius: 8px;
+  border: 2px solid #7aa2f7;
+  border-radius: 12px;
   font-size: 16px;
+  background-color: #24283b;
+  color: #a9b1d6;
+  transition: all 0.3s ease;
+}
+
+.category-input:focus {
+  outline: none;
+  border-color: #bb9af7;
+  box-shadow: 0 0 10px rgba(122, 162, 247, 0.2);
 }
 
 .start-button {
-  background-color: #61dafb;
-  color: #282c34;
-  padding: 12px 24px;
+  background-color: #7aa2f7;
+  color: #1a1b26;
+  padding: 14px 28px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 18px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .start-button:hover {
-  background-color: #4fa8d5;
+  background-color: #bb9af7;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
 }
 
 .score {
   font-size: 24px;
-  color: #61dafb;
+  color: #7aa2f7;
   margin: 20px 0;
+  font-weight: 600;
 }
 
 .question {
   font-size: 20px;
   margin: 20px 0;
-  line-height: 1.4;
+  line-height: 1.5;
+  color: #c0caf5;
 }
 
 .options {
@@ -55,24 +70,49 @@
 }
 
 .option-button {
-  background-color: #282c34;
-  color: white;
-  padding: 15px;
-  border: 2px solid #61dafb;
-  border-radius: 8px;
+  background-color: #24283b;
+  color: #c0caf5;
+  padding: 16px;
+  border: 2px solid #7aa2f7;
+  border-radius: 12px;
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
 
 .option-button:hover {
-  background-color: #61dafb;
-  color: #282c34;
-} 
+  background-color: #7aa2f7;
+  color: #1a1b26;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.option-button.correct {
+  background-color: #4ade80;
+  color: #1a1b26;
+  border-color: #4ade80;
+}
+
+.option-button.wrong {
+  background-color: #f87171;
+  color: #1a1b26;
+  border-color: #f87171;
+}
+
+.option-button:disabled {
+  opacity: 1;
+  cursor: default;
+}
 
 .disclaimer {
-    font-size: 0.9rem;
-    color: #888;
-    margin: 10px 0;
-    font-style: italic;
-  }
+  font-size: 0.9rem;
+  color: #565f89;
+  margin: 20px 0;
+  font-style: italic;
+}
+
+.loading {
+  color: #7aa2f7;
+  font-size: 18px;
+  margin: 20px 0;
+}

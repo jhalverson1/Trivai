@@ -1,15 +1,16 @@
 .App {
   text-align: center;
   min-height: 100vh;
-  background-color: #282c34;
-  color: white;
+  background-color: #1a1b26;
+  color: #a9b1d6;
   padding: 20px;
 }
 
 .App h1 {
-  color: #61dafb;
+  color: #7aa2f7;
   font-size: 2.5rem;
   margin-bottom: 40px;
+  font-weight: 600;
 }
 
 @media (max-width: 600px) {
