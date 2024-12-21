@@ -1,102 +1,79 @@
-from openai import OpenAI
 import os
+import openai
 import json
 import logging
-import re
 
 logger = logging.getLogger(__name__)
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 class QuestionGenerator:
     def __init__(self):
-        self.client = OpenAI(api_key=OPENAI_API_KEY)
-        if not OPENAI_API_KEY:
+        self.api_key = os.getenv('OPENAI_API_KEY')
+        if not self.api_key:
             logger.error("OPENAI_API_KEY not found in environment variables")
-            raise ValueError("OPENAI_API_KEY not found in environment variables")
+            raise ValueError("OPENAI_API_KEY environment variable is required")
+        openai.api_key = self.api_key
 
-    def _parse_question(self, content: str) -> dict:
-        """Parse the OpenAI response into a structured question format."""
+    def generate_question(self, category=None):
         try:
-            # Clean up the content and join any split lines
-            content = ' '.join(content.split())
-            # Split on pipe character
-            parts = content.split('|')
-            
-            if len(parts) != 6:
-                logger.error(f"Invalid response format: {content}")
-                return None
-            
-            question, *options, correct = parts
-            # Clean up the options
-            cleaned_options = []
-            for opt in options:
-                # Remove the letter prefix and any whitespace
-                cleaned_opt = opt.strip()
-                match = re.match(r'^[A-D]\)\s*(.+)$', cleaned_opt)
-                if match:
-                    cleaned_opt = match.group(1).strip()
-                cleaned_options.append(cleaned_opt)
+            logger.info(f"Generating question for category: {category}")
+            if not self.api_key:
+                raise ValueError("OpenAI API key not configured")
 
-            # Extract just the letter from "Correct:X"
-            correct_match = re.search(r'Correct:([A-D])', correct)
-            if not correct_match:
-                logger.error(f"Invalid correct answer format: {correct}")
-                return None
-            correct_letter = correct_match.group(1)
+            prompt = self._build_prompt(category)
+            logger.info("Calling OpenAI API")
             
-            logger.info(f"Successfully parsed question: {question}")
-            logger.info(f"Options: {cleaned_options}")
-            logger.info(f"Correct answer: {correct_letter}")
-            
-            return {
-                "question": question.strip(),
-                "options": [f"{letter}) {opt}" for letter, opt in zip(['A', 'B', 'C', 'D'], cleaned_options)],
-                "correct_answer": correct_letter
-            }
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a trivia question generator."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7
+            )
+
+            logger.info("Received response from OpenAI")
+            result = self._parse_response(response.choices[0].message.content)
+            if not result:
+                logger.error("Failed to parse OpenAI response")
+                raise ValueError("Invalid response format from OpenAI")
+                
+            return result
+
         except Exception as e:
-            logger.error(f"Error parsing question: {str(e)}")
-            return None
+            logger.error(f"Error generating question: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to generate question: {str(e)}")
 
-    def generate_question(self, category=None, max_retries=2):
-        """Generate a trivia question with limited retries."""
-        if not OPENAI_API_KEY:
-            raise Exception("OpenAI API key is not configured")
-
-        base_prompt = """Generate a trivia question in this exact format:
-Question|A) Option1|B) Option2|C) Option3|D) Option4|Correct:Letter
-
-Rules:
-1. Use a single line with pipe separators
-2. No newlines in the response
-3. Options must start with A), B), C), or D)
-4. Correct answer must be just the letter (A, B, C, or D)"""
+    def _build_prompt(self, category):
+        base_prompt = """Generate a multiple-choice trivia question with 4 options (A, B, C, D).
+        Format the response as a JSON object with these fields:
+        - question: the question text
+        - correct_answer: the letter of the correct answer (A, B, C, or D)
+        - options: array of 4 strings, each starting with the letter (A), (B), etc."""
 
         if category:
-            base_prompt += f"\n\nThe question MUST be about {category}."
+            base_prompt += f"\nThe question should be about: {category}"
 
-        for attempt in range(max_retries):
-            try:
-                response = self.client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are a trivia question generator."},
-                        {"role": "user", "content": base_prompt}
-                    ],
-                    temperature=0.7
-                )
-                
-                content = response.choices[0].message.content
-                logger.info(f"Raw response: {content}")
-                parsed = self._parse_question(content)
-                
-                if parsed:
-                    return parsed
-                
-                logger.warning(f"Failed to parse question on attempt {attempt + 1}")
-                
-            except Exception as e:
-                logger.error(f"Error on attempt {attempt + 1}: {str(e)}")
-                if attempt == max_retries - 1:
-                    raise Exception(f"Failed to generate question after {max_retries} attempts")
-        
-        raise Exception("Failed to generate a valid question")
+        return base_prompt
+
+    def _parse_response(self, response_text):
+        try:
+            # Find the JSON part of the response
+            start = response_text.find('{')
+            end = response_text.rfind('}') + 1
+            if start == -1 or end == 0:
+                logger.error("No JSON found in response")
+                return None
+
+            json_str = response_text[start:end]
+            data = json.loads(json_str)
+            
+            required_fields = ['question', 'correct_answer', 'options']
+            if not all(field in data for field in required_fields):
+                logger.error(f"Missing required fields in response: {data}")
+                return None
+
+            return data
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse JSON response: {e}")
+            return None
