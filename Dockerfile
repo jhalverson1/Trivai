@@ -29,10 +29,9 @@ RUN echo '#!/bin/bash\n\
 echo "Waiting for database..."\n\
 sleep 5\n\
 echo "Running migrations..."\n\
-alembic upgrade head\n\
+alembic upgrade head || exit 1\n\
 echo "Starting server..."\n\
-python server.py' > /app/start.sh
+exec python server.py' > /app/start.sh
 
 RUN chmod +x /app/start.sh
-
 CMD ["/app/start.sh"]
