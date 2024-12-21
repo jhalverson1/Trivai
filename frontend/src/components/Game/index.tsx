@@ -8,39 +8,45 @@ const DISCLAIMER = "Questions are generated using AI and focus on historical fac
 
 const Game = () => {
   const {
-    question,
-    score,
-    category,
+    game,
+    config,
     isLoading,
-    isGameStarted,
     answered,
     selectedAnswer,
-    setCategory,
+    updateConfig,
     handleAnswer,
     startGame
   } = useTrivia();
 
+  console.log('Current game state:', game);
+  console.log('Current question:', game?.questions?.[game.currentQuestionIndex]);
+
+  const currentQuestion = game && game.questions ? 
+    game.questions[game.currentQuestionIndex] : null;
+
   return (
     <div className="game-container">
-      {!isGameStarted ? (
+      {!game ? (
         <GameControls
-          category={category}
-          onCategoryChange={setCategory}
+          config={config}
+          onConfigChange={updateConfig}
           onStartGame={startGame}
         />
       ) : (
         <>
           {isLoading ? (
             <div className="loading">Loading...</div>
-          ) : question ? (
+          ) : currentQuestion ? (
             <QuestionDisplay
-              question={question}
-              score={score}
+              question={currentQuestion}
+              score={game.score}
               answered={answered}
               selectedAnswer={selectedAnswer}
               onAnswer={handleAnswer}
             />
-          ) : null}
+          ) : (
+            <div>No questions available</div>
+          )}
         </>
       )}
       <p className="disclaimer">{DISCLAIMER}</p>

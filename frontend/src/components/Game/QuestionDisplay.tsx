@@ -19,13 +19,13 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
   <>
     <h2 className="score">Score: {score}</h2>
     <div>
-      <h3 className="question">{question.question}</h3>
+      <h3 className="question">{question.questionText}</h3>
       <div className="options">
         {question.options.map((option, index) => (
           <button
             className={`option-button ${
               answered
-                ? option.startsWith(question.correct_answer)
+                ? option.startsWith(question.correctAnswer)
                   ? 'correct'
                   : selectedAnswer === option.split(')')[0].trim()
                   ? 'wrong'

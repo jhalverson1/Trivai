@@ -1,85 +1,90 @@
 import { useState } from 'react';
-import { Question } from '../types';
+import { Question, Game, GameConfig } from '../types';
 import { triviaService } from '../services/api.service';
 
 export const useTrivia = () => {
-  const [question, setQuestion] = useState<Question | null>(null);
-  const [nextQuestion, setNextQuestion] = useState<Question | null>(null);
-  const [score, setScore] = useState(0);
-  const [category, setCategory] = useState('');
-  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [game, setGame] = useState<Game | null>(null);
+  const [config, setConfig] = useState<GameConfig>({
+    category: '',
+    numberOfQuestions: 5,
+    difficultyId: 3  // Medium difficulty
+  });
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingNext, setLoadingNext] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
-  const fetchNextQuestion = async () => {
-    setLoadingNext(true);
-    try {
-      const data = await triviaService.getQuestion(category);
-      setNextQuestion(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingNext(false);
-    }
-  };
-
-  const handleAnswer = async (answer: string) => {
-    if (!question || isLoading) return;
-    setSelectedAnswer(answer);
-    setAnswered(true);
-    
-    try {
-      const response = await triviaService.checkAnswer(answer, question.correct_answer);
-      if (response.correct) {
-        setScore(prev => prev + 1);
-      }
-      
-      if (!nextQuestion && !loadingNext) {
-        await fetchNextQuestion();
-      }
-      
-      setTimeout(() => {
-        if (nextQuestion) {
-          setQuestion(nextQuestion);
-          setNextQuestion(null);
-          setAnswered(false);
-          setSelectedAnswer(null);
-          fetchNextQuestion();
-        }
-      }, 1500);
-    } catch (error) {
-      console.error(error);
-      setAnswered(false);
-      setSelectedAnswer(null);
-    }
+  const updateConfig = (updates: Partial<GameConfig>) => {
+    setConfig(prev => ({ ...prev, ...updates }));
   };
 
   const startGame = async () => {
-    setIsGameStarted(true);
     setIsLoading(true);
     try {
-      const data = await triviaService.getQuestion(category);
-      setQuestion(data);
-      fetchNextQuestion();
+      console.log('Starting game with config:', config);
+      const newGame = await triviaService.createGame(config);
+      console.log('Received game data:', newGame);
+      setGame(newGame);
+      console.log('Game state after update:', newGame);
     } catch (error) {
-      console.error(error);
+      console.error('Error starting game:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleAnswer = async (answer: string) => {
+    if (!game || isLoading) return;
+    setSelectedAnswer(answer);
+    setAnswered(true);
+    
+    try {
+      const currentQuestion = game.questions[game.currentQuestionIndex];
+      const response = await triviaService.checkAnswer(answer, currentQuestion.correctAnswer);
+      
+      if (response.correct) {
+        setGame(prev => prev ? { ...prev, score: prev.score + 1 } : null);
+      }
+      
+      // Move to next question after 1.5 seconds
+      setTimeout(() => {
+        setGame(prev => {
+          if (!prev) return null;
+          const nextIndex = prev.currentQuestionIndex + 1;
+          return {
+            ...prev,
+            currentQuestionIndex: nextIndex,
+            status: nextIndex >= prev.questions.length ? 'completed' : 'in_progress'
+          };
+        });
+        setAnswered(false);
+        setSelectedAnswer(null);
+      }, 1500);
+    } catch (error) {
+      console.error('Error checking answer:', error);
+      // Still move to next question even if there's an error
+      setTimeout(() => {
+        setGame(prev => {
+          if (!prev) return null;
+          const nextIndex = prev.currentQuestionIndex + 1;
+          return {
+            ...prev,
+            currentQuestionIndex: nextIndex,
+            status: nextIndex >= prev.questions.length ? 'completed' : 'in_progress'
+          };
+        });
+        setAnswered(false);
+        setSelectedAnswer(null);
+      }, 1500);
+    }
+  };
+
   return {
-    question,
-    nextQuestion,
-    score,
-    category,
+    game,
+    config,
     isLoading,
-    isGameStarted,
     answered,
     selectedAnswer,
-    setCategory,
+    updateConfig,
     handleAnswer,
     startGame
   };

@@ -1,13 +1,18 @@
 import axios from 'axios';
-import { Question, AnswerResponse } from '../types';
+import { Question, Game, GameConfig, AnswerResponse } from '../types';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 export const triviaService = {
-  async getQuestion(category?: string): Promise<Question> {
-    const response = await axios.get(`${API_URL}/api/question`, {
-      params: { category }
-    });
+  async createGame(config: GameConfig): Promise<Game> {
+    console.log('Creating game with config:', config);
+    const response = await axios.post(`${API_URL}/api/games`, config);
+    console.log('Game creation response:', response.data);
+    return response.data;
+  },
+
+  async getGame(gameId: string): Promise<Game> {
+    const response = await axios.get(`${API_URL}/api/games/${gameId}`);
     return response.data;
   },
 
