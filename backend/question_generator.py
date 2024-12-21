@@ -10,10 +10,16 @@ class QuestionGenerator:
             print("OpenAI API key is not set")
             raise Exception("OpenAI API key is not configured")
 
-        prompt = "Generate a trivia question with 4 multiple choice options and indicate the correct answer. "
-        if category:
-            prompt += f"The category should be {category}. "
-        prompt += "Format the response as: Question|A) OptionB) Option2|C) Option3|D) Option4|Correct:Letter"
+        prompt = """Generate a trivia question that is:
+1. Focused on well-established historical facts, scientific concepts, or cultural knowledge
+2. Clear and unambiguous
+3. Have 4 distinct multiple choice options
+4. Include one clearly correct answer
+
+Note: Avoid current events or time-sensitive information.
+If a category is provided, ensure the question fits that category.
+
+Format: Question|A) Option1|B) Option2|C) Option3|D) Option4|Correct:Letter"""
 
         try:
             response = self.client.chat.completions.create(
