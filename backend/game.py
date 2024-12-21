@@ -40,7 +40,7 @@ class TriviaGame:
             if answer == 'Q':
                 break
             
-            # Extract just the letter from the correct_answer if it contains the full answer text
+            ## Extract just the letter from the correct_answer if it contains the full answer text
             correct_letter = question_data['correct_answer']
             if ')' in correct_letter:
                 correct_letter = correct_letter.split(')')[0].strip()
