@@ -21,7 +21,9 @@ async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
     logger.info(f"Received game creation request: {game_data}")
     try:
         # Verify OpenAI API key is set
-        if not os.getenv('OPENAI_API_KEY'):
+        api_key = os.getenv('OPENAI_API_KEY')
+        logger.info(f"API Key present: {bool(api_key)}")
+        if not api_key:
             logger.error("OPENAI_API_KEY not found in environment")
             raise HTTPException(status_code=500, detail="OpenAI API key not configured")
 
@@ -50,6 +52,7 @@ async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
             logger.info(f"Generating question {i+1}/{game_data.numberOfQuestions}")
             try:
                 question_data = question_generator.generate_question(game_data.category)
+                logger.info(f"Generated question data: {question_data is not None}")
                 if not question_data:
                     logger.error("Question generator returned None")
                     continue
@@ -65,6 +68,7 @@ async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
                 questions.append(question)
             except Exception as e:
                 logger.error(f"Error generating question: {str(e)}")
+                logger.exception("Full traceback:")
                 continue
 
         if not questions:

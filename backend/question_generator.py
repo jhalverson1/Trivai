@@ -1,7 +1,9 @@
 import os
 import openai
+from openai import OpenAI
 import json
 import logging
+from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +13,7 @@ class QuestionGenerator:
         if not self.api_key:
             logger.error("OPENAI_API_KEY not found in environment variables")
             raise ValueError("OPENAI_API_KEY environment variable is required")
-        openai.api_key = self.api_key
+        self.client = OpenAI(api_key=self.api_key)
 
     def generate_question(self, category=None):
         try:
@@ -22,16 +24,20 @@ class QuestionGenerator:
             prompt = self._build_prompt(category)
             logger.info("Calling OpenAI API")
             
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a trivia question generator."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7
-            )
+            try:
+                response = self.client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a trivia question generator."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7
+                )
+                logger.info("Received response from OpenAI")
+            except Exception as e:
+                logger.error(f"OpenAI API error: {str(e)}")
+                raise ValueError(f"OpenAI API error: {str(e)}")
 
-            logger.info("Received response from OpenAI")
             result = self._parse_response(response.choices[0].message.content)
             if not result:
                 logger.error("Failed to parse OpenAI response")
@@ -41,7 +47,9 @@ class QuestionGenerator:
 
         except Exception as e:
             logger.error(f"Error generating question: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Failed to generate question: {str(e)}")
+            if isinstance(e, HTTPException):
+                raise e
+            raise ValueError(f"Failed to generate question: {str(e)}")
 
     def _build_prompt(self, category):
         base_prompt = """Generate a multiple-choice trivia question with 4 options (A, B, C, D).
