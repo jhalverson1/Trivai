@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from routes.game import router as game_router
 import json
 import os
@@ -27,11 +28,6 @@ app.add_middleware(
 # Mount the game routes
 app.include_router(game_router, prefix="/api")
 
-# Root route handler
-@app.get("/")
-async def root():
-    return JSONResponse(content={"status": "ok", "message": "API is running"})
-
 # Check answer endpoint
 @app.post("/api/check-answer")
 async def check_answer(answer_data: dict):
@@ -46,6 +42,9 @@ async def check_answer(answer_data: dict):
         "correct": is_correct,
         "correct_answer": correct_answer
     }
+
+# Mount static files before the 404 handler
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 # Handle 404 errors
 @app.exception_handler(404)
