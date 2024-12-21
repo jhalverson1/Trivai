@@ -4,9 +4,16 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
 
-# Create static directory and add a placeholder index.html
-RUN mkdir -p static && \
-    echo "<html><body>Development Server</body></html>" > static/index.html
+ENV PORT=8080
+EXPOSE $PORT
 
-EXPOSE 8000
-CMD ["python", "server.py"] 
+RUN echo '#!/bin/bash\n\
+echo "Waiting for database..."\n\
+sleep 5\n\
+echo "Running migrations..."\n\
+alembic upgrade head || exit 1\n\
+echo "Starting server..."\n\
+exec uvicorn server:app --host 0.0.0.0 --port $PORT' > /app/start.sh
+
+RUN chmod +x /app/start.sh
+CMD ["/app/start.sh"] 
