@@ -5,9 +5,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 export const triviaService = {
   async createGame(config: GameConfig): Promise<Game> {
-    console.log('Creating game with config:', config);
     const response = await axios.post(`${API_URL}/api/games`, config);
-    console.log('Game creation response:', response.data);
     return response.data;
   },
 

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 import models
 import json
+from routes import game
 
 app = FastAPI()
 
@@ -70,19 +71,22 @@ async def get_question(category: Optional[str] = None, db: Session = Depends(get
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/check-answer")
-async def check_answer(answer_request: AnswerRequest) -> dict:
-    user_answer = answer_request.answer.upper()
-    correct_letter = answer_request.correct_answer
+async def check_answer(answer_data: dict):
+    user_answer = answer_data.get('answer', '').upper()
+    correct_answer = answer_data.get('correct_answer', '')
     
     # Extract just the letter if the answer contains full text
-    if ')' in correct_letter:
-        correct_letter = correct_letter.split(')')[0].strip()
+    if ')' in correct_answer:
+        correct_answer = correct_answer.split(')')[0].strip()
     
-    is_correct = user_answer == correct_letter
+    is_correct = user_answer == correct_answer
     return {
         "correct": is_correct,
-        "correct_answer": answer_request.correct_answer
-    } 
+        "correct_answer": correct_answer
+    }
 
-# Add after your existing FastAPI setup
+# Include the game routes
+app.include_router(game.router, prefix="/api")
+
+# Mount static files last
 app.mount("/", StaticFiles(directory="static", html=True))

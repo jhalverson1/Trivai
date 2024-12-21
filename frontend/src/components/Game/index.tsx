@@ -18,9 +18,6 @@ const Game = () => {
     startGame
   } = useTrivia();
 
-  console.log('Current game state:', game);
-  console.log('Current question:', game?.questions?.[game.currentQuestionIndex]);
-
   const currentQuestion = game && game.questions ? 
     game.questions[game.currentQuestionIndex] : null;
 

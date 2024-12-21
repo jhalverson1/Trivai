@@ -20,11 +20,8 @@ export const useTrivia = () => {
   const startGame = async () => {
     setIsLoading(true);
     try {
-      console.log('Starting game with config:', config);
       const newGame = await triviaService.createGame(config);
-      console.log('Received game data:', newGame);
       setGame(newGame);
-      console.log('Game state after update:', newGame);
     } catch (error) {
       console.error('Error starting game:', error);
     } finally {

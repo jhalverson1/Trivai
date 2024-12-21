@@ -89,3 +89,18 @@ def get_game(game_id: int, db: Session = Depends(get_db)):
     if not game:
         raise HTTPException(status_code=404, detail="Game not found")
     return game
+
+@router.post("/check-answer")
+async def check_answer(answer_data: dict):
+    user_answer = answer_data.get('answer', '').upper()
+    correct_answer = answer_data.get('correct_answer', '')
+    
+    # Extract just the letter if the answer contains full text
+    if ')' in correct_answer:
+        correct_answer = correct_answer.split(')')[0].strip()
+    
+    is_correct = user_answer == correct_answer.upper()  # Make sure both are uppercase
+    return {
+        "correct": is_correct,
+        "correct_answer": correct_answer
+    }
