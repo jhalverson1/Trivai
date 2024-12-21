@@ -70,23 +70,24 @@ async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
         db.commit()
 
         # Return game with questions
-        response = GameResponse(
-            id=new_game.id,
-            category=new_game.category,
-            numberOfQuestions=new_game.number_of_questions,
-            difficultyId=new_game.difficulty_id,
-            currentQuestionIndex=new_game.current_question_index,
-            score=new_game.score,
-            status=new_game.status.value,
-            questions=[{
-                'id': q.id,
-                'questionText': q.question_text,
-                'correctAnswer': q.correct_answer,
-                'options': json.loads(q.options)
+        return {
+            "id": str(new_game.id),
+            "category": new_game.category,
+            "numberOfQuestions": new_game.number_of_questions,
+            "difficultyId": new_game.difficulty_id,
+            "currentQuestionIndex": new_game.current_question_index,
+            "score": new_game.score,
+            "status": new_game.status.value,
+            "questions": [{
+                "id": str(q.id),
+                "questionText": q.question_text,
+                "correctAnswer": q.correct_answer,
+                "options": json.loads(q.options),
+                "difficultyId": q.difficulty_id,
+                "gameId": str(q.game_id),
+                "createdAt": q.created_at
             } for q in questions]
-        )
-        logger.info("Successfully created game and questions")
-        return response
+        }
 
     except Exception as e:
         logger.error(f"Error creating game: {str(e)}")
