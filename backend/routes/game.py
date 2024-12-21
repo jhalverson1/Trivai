@@ -9,6 +9,7 @@ from models import Game, Question, GameStatus, Difficulty
 from schemas import GameCreate, GameResponse
 from question_generator import QuestionGenerator
 import os
+from sqlalchemy import func
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,10 +34,22 @@ async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
             logger.error(f"Difficulty {game_data.difficultyId} not found")
             raise HTTPException(status_code=400, detail=f"Difficulty {game_data.difficultyId} not found")
 
-        # Create new game
-        logger.info("Creating new game")
+        # Get or create category
+        category = db.query(models.Category).filter(
+            models.Category.name == game_data.category.lower()
+        ).first()
+        
+        if category:
+            category.search_count += 1
+        else:
+            category = models.Category(name=game_data.category.lower())
+            db.add(category)
+        
+        db.flush()  # Get category.id without committing
+
+        # Create new game with category_id
         new_game = Game(
-            category=game_data.category,
+            category_id=category.id,
             number_of_questions=game_data.numberOfQuestions,
             difficulty_id=game_data.difficultyId,
             status=GameStatus.in_progress
@@ -63,7 +76,8 @@ async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
                     correct_answer=question_data['correct_answer'],
                     options=json.dumps(question_data['options']),
                     difficulty_id=game_data.difficultyId,
-                    game_id=new_game.id
+                    game_id=new_game.id,
+                    category_id=category.id
                 )
                 questions.append(question)
             except Exception as e:
@@ -84,7 +98,7 @@ async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
         # Return game with questions
         return {
             "id": str(new_game.id),
-            "category": new_game.category,
+            "category": new_game.category.name if new_game.category else "",
             "numberOfQuestions": new_game.number_of_questions,
             "difficultyId": new_game.difficulty_id,
             "currentQuestionIndex": new_game.current_question_index,

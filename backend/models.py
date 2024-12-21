@@ -16,11 +16,25 @@ class Difficulty(Base):
     name = Column(String, nullable=False, unique=True)
     description = Column(String)
 
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
+    search_count = Column(Integer, default=1)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    def __init__(self, **kwargs):
+        if 'name' in kwargs:
+            kwargs['name'] = kwargs['name'].lower()
+        super().__init__(**kwargs)
+
 class Game(Base):
     __tablename__ = "games"
 
     id = Column(Integer, primary_key=True, index=True)
-    category = Column(String)
+    category_id = Column(Integer, ForeignKey("categories.id"))
     number_of_questions = Column(Integer, nullable=False)
     difficulty_id = Column(Integer, ForeignKey("difficulties.id"), nullable=False)
     current_question_index = Column(Integer, default=0)
@@ -30,6 +44,7 @@ class Game(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     difficulty = relationship("Difficulty")
+    category = relationship("Category")
     questions = relationship("Question", back_populates="game")
 
 class Question(Base):
@@ -41,7 +56,10 @@ class Question(Base):
     options = Column(String, nullable=False)  # Store as JSON string
     difficulty_id = Column(Integer, ForeignKey("difficulties.id"), nullable=False)
     game_id = Column(Integer, ForeignKey("games.id"))
+    category_id = Column(Integer, ForeignKey("categories.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     difficulty = relationship("Difficulty")
-    game = relationship("Game", back_populates="questions") 
+    game = relationship("Game", back_populates="questions")
+    category = relationship("Category")
+  
