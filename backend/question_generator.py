@@ -10,6 +10,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 class QuestionGenerator:
     def __init__(self):
         self.client = OpenAI(api_key=OPENAI_API_KEY)
+        if not OPENAI_API_KEY:
+            logger.error("OPENAI_API_KEY not found in environment variables")
+            raise ValueError("OPENAI_API_KEY not found in environment variables")
 
     def _parse_question(self, content: str) -> dict:
         """Parse the OpenAI response into a structured question format."""
