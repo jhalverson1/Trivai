@@ -24,11 +24,15 @@ ENV CORS_ORIGIN="https://*.railway.app"
 ENV PORT=8080
 EXPOSE $PORT
 
-# Run migrations and start server
-CMD bash -c '\
-    echo "Waiting for database..." && \
-    sleep 5 && \
-    echo "Running migrations..." && \
-    alembic upgrade head && \
-    echo "Starting server..." && \
-    python server.py'
+# Create a startup script
+RUN echo '#!/bin/bash\n\
+echo "Waiting for database..."\n\
+sleep 5\n\
+echo "Running migrations..."\n\
+alembic upgrade head\n\
+echo "Starting server..."\n\
+python server.py' > /app/start.sh
+
+RUN chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]
