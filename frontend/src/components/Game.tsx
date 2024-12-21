@@ -14,6 +14,8 @@ const Game = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [nextQuestion, setNextQuestion] = useState<Question | null>(null);
+  const [loadingNext, setLoadingNext] = useState(false);
 
   const fetchQuestion = async () => {
     setIsLoading(true);
@@ -26,6 +28,20 @@ const Game = () => {
       console.error('Error fetching question:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchNextQuestion = async () => {
+    setLoadingNext(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/question`, {
+        params: { category: category || undefined }
+      });
+      setNextQuestion(response.data);
+    } catch (error) {
+      console.error('Error fetching next question:', error);
+    } finally {
+      setLoadingNext(false);
     }
   };
 
@@ -44,10 +60,18 @@ const Game = () => {
         setScore(prev => prev + 1);
       }
       
-      setTimeout(async () => {
-        setAnswered(false);
-        setSelectedAnswer(null);
-        await fetchQuestion();
+      if (!nextQuestion && !loadingNext) {
+        await fetchNextQuestion();
+      }
+      
+      setTimeout(() => {
+        if (nextQuestion) {
+          setQuestion(nextQuestion);
+          setNextQuestion(null);
+          setAnswered(false);
+          setSelectedAnswer(null);
+          fetchNextQuestion();
+        }
       }, 1500);
     } catch (error) {
       console.error('Error checking answer:', error);
@@ -56,9 +80,20 @@ const Game = () => {
     }
   };
 
-  const startGame = () => {
+  const startGame = async () => {
     setIsGameStarted(true);
-    fetchQuestion();
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/question`, {
+        params: { category: category || undefined }
+      });
+      setQuestion(response.data);
+      fetchNextQuestion();
+    } catch (error) {
+      console.error('Error fetching question:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
