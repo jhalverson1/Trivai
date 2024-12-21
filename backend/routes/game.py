@@ -8,6 +8,7 @@ import models
 from models import Game, Question, GameStatus, Difficulty
 from schemas import GameCreate, GameResponse
 from question_generator import QuestionGenerator
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,6 +20,11 @@ question_generator = QuestionGenerator()
 async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
     logger.info(f"Received game creation request: {game_data}")
     try:
+        # Verify OpenAI API key is set
+        if not os.getenv('OPENAI_API_KEY'):
+            logger.error("OPENAI_API_KEY not found in environment")
+            raise HTTPException(status_code=500, detail="OpenAI API key not configured")
+
         # Verify difficulty exists
         difficulty = db.query(Difficulty).filter(Difficulty.id == game_data.difficultyId).first()
         if not difficulty:
@@ -63,6 +69,8 @@ async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
 
         if not questions:
             logger.error("No questions were generated successfully")
+            db.delete(new_game)
+            db.commit()
             raise HTTPException(status_code=500, detail="Failed to generate questions")
 
         logger.info(f"Adding {len(questions)} questions to database")
