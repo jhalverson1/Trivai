@@ -14,13 +14,19 @@ if config.config_file_name is not None:
 
 # Get the database URL from environment
 def get_url():
-    # Get DATABASE_URL from environment variable, with a fallback for local Docker
     db_url = os.getenv("DATABASE_URL")
+    print("\n=== Alembic Database Connection Info ===")
+    print(f"Original URL: {db_url}")
     
-    # Handle Railway's Postgres URL format if present
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
+        print(f"Modified URL: {db_url}")
     
+    host = db_url.split('@')[1].split('/')[0] if '@' in db_url else 'unknown'
+    db_name = db_url.split('/')[-1] if '/' in db_url else 'unknown'
+    print(f"Host: {host}")
+    print(f"Database: {db_name}")
+    print("=====================================\n")
     return db_url
 
 # Set the target metadata

@@ -32,9 +32,9 @@ services:
         echo "Listing migrations:" &&
         ls -la alembic/versions/ &&
         echo "Running alembic current..." &&
-        PYTHONPATH=/app DATABASE_URL=postgresql://postgres:postgres@db:5432/trivai alembic current &&
+        alembic current &&
         echo "Running alembic upgrade..." &&
-        PYTHONPATH=/app DATABASE_URL=postgresql://postgres:postgres@db:5432/trivai alembic upgrade head &&
+        alembic upgrade head &&
         echo "Verifying database..." &&
         python verify_db.py &&
         echo "Migrations complete" &&
