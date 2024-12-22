@@ -25,7 +25,7 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
           <button
             className={`option-button ${
               answered
-                ? option.startsWith(question.correctAnswer)
+                ? option.split(')')[0].trim() === question.correctAnswer
                   ? 'correct'
                   : selectedAnswer === option.split(')')[0].trim()
                   ? 'wrong'
