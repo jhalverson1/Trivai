@@ -12,7 +12,13 @@ elif DATABASE_URL.startswith("postgres://"):
     # Handle Railway's Postgres URL format if present
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-print(f"Connecting to database: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'unknown'}")  # Safe logging
+# Enhanced logging
+host = DATABASE_URL.split('@')[1].split('/')[0] if '@' in DATABASE_URL else 'unknown'
+db_name = DATABASE_URL.split('/')[-1] if '/' in DATABASE_URL else 'unknown'
+print(f"\n=== Database Connection Info ===")
+print(f"Host: {host}")
+print(f"Database: {db_name}")
+print("============================\n")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
