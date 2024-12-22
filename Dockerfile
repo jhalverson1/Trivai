@@ -4,7 +4,8 @@ WORKDIR /frontend
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ .
-ENV REACT_APP_API_URL=https://trivai-production-1311.up.railway.app
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
 RUN npm run build
 
 # Backend stage
