@@ -2,6 +2,7 @@ import React from 'react';
 import { useTrivia } from '../../hooks/useTrivia';
 import { GameControls } from './GameControls';
 import QuestionDisplay from './QuestionDisplay';
+import GameOver from './GameOver';
 import '../../styles/Game.css';
 
 const DISCLAIMER = "Questions are generated using AI and focus on historical facts, science, and general knowledge.";
@@ -15,7 +16,8 @@ const Game = () => {
     selectedAnswer,
     updateConfig,
     handleAnswer,
-    startGame
+    startGame,
+    resetGame
   } = useTrivia();
 
   const currentQuestion = game && game.questions ? 
@@ -33,6 +35,12 @@ const Game = () => {
         <>
           {isLoading ? (
             <div className="loading">Loading...</div>
+          ) : game.status === 'completed' ? (
+            <GameOver
+              score={game.score}
+              totalQuestions={game.questions.length}
+              onRestart={resetGame}
+            />
           ) : currentQuestion ? (
             <QuestionDisplay
               question={currentQuestion}

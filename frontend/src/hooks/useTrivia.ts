@@ -75,6 +75,13 @@ export const useTrivia = () => {
     }
   };
 
+  const resetGame = () => {
+    setGame(null);
+    setAnswered(false);
+    setSelectedAnswer(null);
+    setIsLoading(false);
+  };
+
   return {
     game,
     config,
@@ -83,6 +90,7 @@ export const useTrivia = () => {
     selectedAnswer,
     updateConfig,
     handleAnswer,
-    startGame
+    startGame,
+    resetGame
   };
 };

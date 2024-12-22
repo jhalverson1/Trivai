@@ -194,3 +194,39 @@
     width: 100%;
   }
 }
+
+.game-over {
+  text-align: center;
+  padding: 2rem;
+}
+
+.game-over h2 {
+  color: #7aa2f7;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.game-over .stats {
+  margin: 2rem 0;
+  font-size: 1.2rem;
+  color: #c0caf5;
+}
+
+.restart-button {
+  background-color: #7aa2f7;
+  color: #1a1b26;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.restart-button:hover {
+  background-color: #bb9af7;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+}
