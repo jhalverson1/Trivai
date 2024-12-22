@@ -15,10 +15,7 @@ if config.config_file_name is not None:
 # Get the database URL from environment
 def get_url():
     # Get DATABASE_URL from environment variable, with a fallback for local Docker
-    db_url = os.getenv(
-        "DATABASE_URL",
-        "postgresql://postgres:postgres@db:5432/trivai"
-    )
+    db_url = os.getenv("DATABASE_URL")
     
     # Handle Railway's Postgres URL format if present
     if db_url.startswith("postgres://"):
