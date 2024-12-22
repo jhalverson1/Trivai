@@ -54,6 +54,10 @@ async def not_found_handler(request: Request, exc: HTTPException):
         content={"detail": f"Route {request.url.path} not found"}
     )
 
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8080))
