@@ -1,5 +1,5 @@
 .game-container {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -26,7 +26,8 @@
 .start-button {
   background-color: #7aa2f7;
   color: #1a1b26;
-  padding: 14px 28px;
+  padding: 12px 28px;
+  height: 47px;
   border: none;
   border-radius: 12px;
   font-size: 18px;
@@ -34,6 +35,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: auto;
 }
 
 .start-button:hover {
@@ -115,4 +117,80 @@
   color: #7aa2f7;
   font-size: 18px;
   margin: 20px 0;
+}
+
+.game-setup {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 30px;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  color: #a9b1d6;
+  font-size: 16px;
+  text-align: left;
+}
+
+.category-input {
+  width: 300px;
+  margin: 0;
+}
+
+.difficulty-select {
+  width: 200px;
+}
+
+.questions-input {
+  width: 120px;
+}
+
+.category-input,
+.difficulty-select,
+.questions-input {
+  padding: 12px;
+  border: 2px solid #7aa2f7;
+  border-radius: 12px;
+  font-size: 16px;
+  background-color: #24283b;
+  color: #a9b1d6;
+  transition: all 0.3s ease;
+}
+
+.difficulty-select:focus,
+.questions-input:focus,
+.category-input:focus {
+  outline: none;
+  border-color: #bb9af7;
+  box-shadow: 0 0 10px rgba(122, 162, 247, 0.2);
+}
+
+/* Style the dropdown arrow for the select */
+.difficulty-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237aa2f7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+@media (max-width: 600px) {
+  .game-setup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .category-input,
+  .difficulty-select,
+  .questions-input {
+    width: 100%;
+  }
 }
