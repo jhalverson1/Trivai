@@ -1,8 +1,12 @@
 import axios from 'axios';
 import { Question, Game, GameConfig, AnswerResponse } from '../types';
 
-// Ensure we don't duplicate the domain
-const API_URL = process.env.REACT_APP_API_URL?.replace(/\/+$/, '') || 'http://localhost:8080';
+// Ensure URL has protocol and no trailing slashes
+const API_URL = process.env.REACT_APP_API_URL?.startsWith('http') 
+  ? process.env.REACT_APP_API_URL.replace(/\/+$/, '')
+  : `https://${process.env.REACT_APP_API_URL}`.replace(/\/+$/, '') || 'http://localhost:8080';
+
+console.log('API_URL:', API_URL); // Debug log
 
 export const triviaService = {
   async createGame(config: GameConfig): Promise<Game> {
