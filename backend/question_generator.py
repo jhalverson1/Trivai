@@ -52,7 +52,8 @@ class QuestionGenerator:
             raise ValueError(f"Failed to generate question: {str(e)}")
 
     def _build_prompt(self, category):
-        base_prompt = """Generate a multiple-choice trivia question with 4 options (A, B, C, D).
+        base_prompt = """Generate a multiple-choice trivia question with 4 UNIQUE options (A, B, C, D).
+        Each answer option must be different from the others.
         Format the response as a JSON object with these fields:
         - question: the question text
         - correct_answer: the letter of the correct answer (A, B, C, or D)
@@ -65,7 +66,6 @@ class QuestionGenerator:
 
     def _parse_response(self, response_text):
         try:
-            # Find the JSON part of the response
             start = response_text.find('{')
             end = response_text.rfind('}') + 1
             if start == -1 or end == 0:
@@ -78,6 +78,12 @@ class QuestionGenerator:
             required_fields = ['question', 'correct_answer', 'options']
             if not all(field in data for field in required_fields):
                 logger.error(f"Missing required fields in response: {data}")
+                return None
+
+            # Validate unique options
+            options = [opt.split(')')[1].strip() for opt in data['options']]
+            if len(options) != len(set(options)):
+                logger.error("Duplicate answer options detected")
                 return None
 
             return data
