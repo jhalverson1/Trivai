@@ -6,7 +6,7 @@ export const useTrivia = () => {
   const [game, setGame] = useState<Game | null>(null);
   const [config, setConfig] = useState<GameConfig>({
     category: '',
-    numberOfQuestions: 5,
+    numberOfQuestions: 1,
     difficultyId: 3  // Medium difficulty
   });
   const [isLoading, setIsLoading] = useState(false);
