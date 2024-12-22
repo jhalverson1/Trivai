@@ -19,6 +19,11 @@ question_generator = QuestionGenerator()
 
 @router.post("/games")
 async def create_game(game_data: GameCreate, db: Session = Depends(get_db)):
+    logger.info("=== Route Debug Info ===")
+    logger.info(f"Endpoint: POST /api/games")
+    logger.info(f"Request data: {game_data}")
+    logger.info("========================")
+    
     logger.info(f"Received game creation request: {game_data}")
     try:
         # Verify OpenAI API key is set
